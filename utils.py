@@ -41,6 +41,8 @@ def p_mean_variance(model, x, t):
 
 
 def p_sample(model, x, t, alphas, betas, one_minus_alphas_bar_sqrt):
+    # why there is no such "for ... do"?
+    # Because the variable like alphas is actually a sequence with t as its index
     t = torch.tensor([t])
     # Factor to the model output
     eps_factor = ((1 - extract(alphas, t, x)) / extract(one_minus_alphas_bar_sqrt, t, x))

@@ -20,17 +20,18 @@ data = s_curve.T
 
 fig, axes = plt.subplots(1, 3, figsize=(20, 5))
 
-axes[0].scatter(*data, alpha=0.5, color='white', edgecolor='gray', s=5);
+axes[0].scatter(*data, alpha=0.5, color='white', edgecolor='gray', s=5)
 axes[0].axis('off')
 
 data = swiss_roll.T
-axes[1].scatter(*data, alpha=0.5, color='white', edgecolor='gray', s=5);
+axes[1].scatter(*data, alpha=0.5, color='white', edgecolor='gray', s=5)
 axes[1].axis('off')
 # dataset = torch.Tensor(data.T).float()
 
 data = moons.T
-axes[2].scatter(*data, alpha=0.5, color='white', edgecolor='gray', s=3);
+axes[2].scatter(*data, alpha=0.5, color='white', edgecolor='gray', s=3)
 axes[2].axis('off')
+plt.show()
 dataset = torch.Tensor(data.T).float()
 num_steps = 100
 # betas = torch.tensor([1.7e-5] * num_steps)
@@ -45,22 +46,24 @@ one_minus_alphas_bar_sqrt = torch.sqrt(1 - alphas_prod)
 
 
 def q_x(x_0, t, noise=None):
+    # q_t(x_0) = \sqrt{\alpha_t} x_0 + \sqrt{1 - \alpha_t} \epsilon_t
     if noise is None:
         noise = torch.randn_like(x_0)
-    alphas_t = extract(alphas_bar_sqrt, t, x_0)
-    alphas_1_m_t = extract(one_minus_alphas_bar_sqrt, t, x_0)
+    alphas_t = extract(alphas_bar_sqrt, t, x_0)  # it's used to compute q_t. (1)
+    alphas_1_m_t = extract(one_minus_alphas_bar_sqrt, t, x_0)  # it's used to compute q_t. (2)
     return (alphas_t * x_0 + alphas_1_m_t * noise)
 
 
 fig, axs = plt.subplots(1, 10, figsize=(28, 3))
+plt.show()
 for i in range(10):
     q_i = q_x(dataset, torch.tensor([i * 10]))
-    axs[i].scatter(q_i[:, 0], q_i[:, 1], color='white', edgecolor='gray', s=5);
-    axs[i].set_axis_off();
+    axs[i].scatter(q_i[:, 0], q_i[:, 1], color='white', edgecolor='gray', s=5)
+    axs[i].set_axis_off()
     axs[i].set_title('$q(\mathbf{x}_{' + str(i * 10) + '})$')
-posterior_mean_coef_1 = (betas * torch.sqrt(alphas_prod_p) / (1 - alphas_prod))
-posterior_mean_coef_2 = ((1 - alphas_prod_p) * torch.sqrt(alphas) / (1 - alphas_prod))
-posterior_variance = betas * (1 - alphas_prod_p) / (1 - alphas_prod)
+posterior_mean_coef_1 = (betas * torch.sqrt(alphas_prod_p) / (1 - alphas_prod))  # it's used to compute mu_t. (1)
+posterior_mean_coef_2 = ((1 - alphas_prod_p) * torch.sqrt(alphas) / (1 - alphas_prod))  # it's used to compute mu_t. (2)
+posterior_variance = betas * (1 - alphas_prod_p) / (1 - alphas_prod)  # it's used to compute sigma_t.
 posterior_log_variance_clipped = torch.log(torch.cat((posterior_variance[1].view(1, 1), posterior_variance[1:].view(-1, 1)), 0)).view(-1)
 
 
@@ -86,7 +89,7 @@ ema.register(model)
 batch_size = 128
 for t in range(1000):
     # X is a torch Variable
-    permutation = torch.randperm(dataset.size()[0])
+    permutation = torch.randperm(dataset.size()[0])  # Shuffle the data
     for i in range(0, dataset.size()[0], batch_size):
         # Retrieve current batch
         indices = permutation[i:i + batch_size]
@@ -110,8 +113,8 @@ for t in range(1000):
         fig, axs = plt.subplots(1, 10, figsize=(28, 3))
         for i in range(1, 11):
             cur_x = x_seq[i * 10].detach()
-            axs[i - 1].scatter(cur_x[:, 0], cur_x[:, 1], color='white', edgecolor='gray', s=5);
-            axs[i - 1].set_axis_off();
+            axs[i - 1].scatter(cur_x[:, 0], cur_x[:, 1], color='white', edgecolor='gray', s=5)
+            axs[i - 1].set_axis_off()
             axs[i - 1].set_title('$q(\mathbf{x}_{' + str(i * 100) + '})$')
 ## Animation
 # Generating the forward image sequence
@@ -121,11 +124,11 @@ from PIL import Image
 
 imgs = []
 # fig, axs = plt.subplots(1, 10, figsize=(28, 3))
-for i in range(100):
+for i in range(100):  # 100 is the number of steps
     plt.clf()
-    q_i = q_x(dataset, torch.tensor([i]))
-    plt.scatter(q_i[:, 0], q_i[:, 1], color='white', edgecolor='gray', s=5);
-    plt.axis('off');
+    q_i = q_x(dataset, torch.tensor([i]))  # q_i is the current state of the diffusion process at time i (i.e. q(x_i))
+    plt.scatter(q_i[:, 0], q_i[:, 1], color='white', edgecolor='gray', s=5)
+    plt.axis('off')
 
     img_buf = io.BytesIO()
     plt.savefig(img_buf, format='png')
@@ -138,7 +141,7 @@ reverse = []
 for i in range(100):
     plt.clf()
     cur_x = x_seq[i].detach()
-    plt.scatter(cur_x[:, 0], cur_x[:, 1], color='white', edgecolor='gray', s=5);
+    plt.scatter(cur_x[:, 0], cur_x[:, 1], color='white', edgecolor='gray', s=5)
     plt.axis('off')
 
     img_buf = io.BytesIO()
